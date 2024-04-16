@@ -163,9 +163,9 @@ int main(int argc, char const *argv[]) {
     }
     int alarma;
     if(retardo == 0) {
-        alarma = 47;
+        alarma = 20;
     } else {
-        alarma = 57;
+        alarma = 30;
     }
     alarm(alarma);
 
