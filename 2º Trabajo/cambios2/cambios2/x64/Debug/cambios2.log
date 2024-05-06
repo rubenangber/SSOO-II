@@ -1,0 +1,5 @@
+﻿  cambios2.cpp
+C:\Users\ruben\OneDrive\Documentos\GitHub\ACADEMIA-SSOO-II\2º Trabajo\cambios2\cambios2\cambios2.cpp(49,16): warning C4311: 'reinterpret_cast': truncamiento de puntero de 'LPVOID' a 'int'
+C:\Users\ruben\OneDrive\Documentos\GitHub\ACADEMIA-SSOO-II\2º Trabajo\cambios2\cambios2\cambios2.cpp(49,16): warning C4302: 'reinterpret_cast': truncamiento de 'LPVOID' a 'int'
+C:\Users\ruben\OneDrive\Documentos\GitHub\ACADEMIA-SSOO-II\2º Trabajo\cambios2\cambios2\cambios2.cpp(189,49): warning C4312: 'reinterpret_cast': conversión de 'int' a 'LPVOID' de mayor tamaño
+  cambios2.vcxproj -> C:\Users\ruben\OneDrive\Documentos\GitHub\ACADEMIA-SSOO-II\2º Trabajo\cambios2\x64\Debug\cambios2.exe

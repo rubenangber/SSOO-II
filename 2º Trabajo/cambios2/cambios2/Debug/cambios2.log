@@ -1,0 +1,3 @@
+﻿  cambios2.cpp
+cambios2.obj : warning LNK4075: se omite '/EDITANDCONTINUE' debido a la especificación '/INCREMENTAL:NO'
+  cambios2.vcxproj -> C:\Users\ruben\OneDrive\Escritorio\cambios2\Debug\cambios2.exe
