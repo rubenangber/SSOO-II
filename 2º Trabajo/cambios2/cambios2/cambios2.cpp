@@ -32,7 +32,7 @@ struct MemoriaCompartida {
 struct estructuraHijo {
     int i;
     int idPadre;
-}estructura[32];
+} estructura[32];
 
 void placeMemory(int hijo) {
     char letra = LETRAS[hijo];
