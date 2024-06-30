@@ -20,6 +20,8 @@ HANDLE sem2;
 HANDLE sem3;
 HANDLE sem4;
 
+HANDLE sem5;
+
 long prevCount;
 
 struct MemoriaCompartida {
@@ -111,8 +113,6 @@ DWORD WINAPI funcHilo(LPVOID param) {
     ReleaseSemaphore(sem1, 1, &prevCount);
     WaitForSingleObject(sem2, INFINITE);
 
-    Sleep(1);
-
     while (memoria_compartida->comprobar) {
         WaitForSingleObject(sem4, INFINITE);
         posLetra = findLetterPos(hijo);
@@ -192,6 +192,7 @@ DWORD WINAPI funcHiloPadre(LPVOID param) {
     }
     Sleep(retardo);
     memoria_compartida->comprobar = 0;
+    ReleaseSemaphore(sem5, 1, &prevCount);
     finCambios();
     exit(0);
 
@@ -210,18 +211,18 @@ int isNumber(const char* str) {
 }
 
 int main(int argc, char* argv[]) {
-    // Comprobar parámetros
+    // Comprobar parÃ¡metros
     if (argc < 2) {
         printf("Modo de uso >> '%s <retardo>'\n", argv[0]);
         return 1;
     }
     if (!isNumber(argv[1])) {
-        printf("Error: '%s' no es un número válido\n", argv[1]);
+        printf("Error: '%s' no es un nï¿½mero vï¿½lido\n", argv[1]);
         return 1;
     }
     int retardo = atoi(argv[1]);
     if (retardo < 0) {
-        printf("Error: El número debe ser mayor o igual a 0\n");
+        printf("Error: El nï¿½mero debe ser mayor o igual a 0\n");
         return 1;
     }
 
@@ -238,8 +239,8 @@ int main(int argc, char* argv[]) {
             INVALID_HANDLE_VALUE,       // Handle de archivo (INVALID_HANDLE_VALUE para memoria compartida)
             NULL,                       // Atributos de seguridad (predeterminado)
             PAGE_READWRITE,             // Permisos de lectura/escritura
-            0,                          // Tamaño máximo alto (para memoria compartida)
-            sizeof(MemoriaCompartida),  // Tamaño total de la memoria compartida
+            0,                          // TamaÃ±o mÃ¡ximo alto (para memoria compartida)
+            sizeof(MemoriaCompartida),  // TamaÃ±o total de la memoria compartida
             "MiMemoriaCompartida"       // Nombre de la memoria compartida
         );
 
@@ -254,7 +255,7 @@ int main(int argc, char* argv[]) {
             FILE_MAP_READ | FILE_MAP_WRITE, // Permisos de acceso (lectura/escritura)
             0,                              // Desplazamiento alto
             0,                              // Desplazamiento bajo
-            sizeof(MemoriaCompartida)       // Tamaño de vista a mapear
+            sizeof(MemoriaCompartida)       // TamaÃ±o de vista a mapear
         );
 
         if (memoria_compartida == NULL) {
@@ -276,14 +277,14 @@ int main(int argc, char* argv[]) {
         DWORD threadId = GetCurrentThreadId();
 
         // Construir la cadena wchar_t con formato correcto
-        wchar_t programa[100]; // Tamaño suficiente para contener la cadena resultante
+        wchar_t programa[100]; // TamaÃ±o suficiente para contener la cadena resultante
         swprintf(programa, 100, L"cambios2.exe %hs %lu", argv[1], threadId);
 
         // Convertir wchar_t a char
         char programa_char[100];
         int num_chars = WideCharToMultiByte(CP_ACP, 0, programa, -1, programa_char, 100, NULL, NULL);
         if (num_chars == 0) {
-            printf("Error en la conversión de WideCharToMultiByte.\n");
+            printf("Error en la conversiï¿½n de WideCharToMultiByte.\n");
             return 1;
         }
 
@@ -317,18 +318,24 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        //SEM5
+        sem5 = CreateSemaphore(NULL, 0, 1, "sem5");
+        if (sem5 == NULL) {
+            return 1;
+        }
+
         inicioCambios(retardo, mutex, memoria_compartida->shared_memory);
 
-        if (!CreateProcess(NULL,                   // Nombre del módulo a ejecutar (usamos NULL para usar el nombre del programa)
+        if (!CreateProcess(NULL,                   // Nombre del mï¿½dulo a ejecutar (usamos NULL para usar el nombre del programa)
             programa_char,                         // Nombre del programa a ejecutar
             NULL,                                  // Atributos de seguridad del proceso (por defecto NULL)
             NULL,                                  // Atributos de seguridad del hilo principal (por defecto NULL)
             TRUE,                                  // Manejo de herencia del proceso (por defecto TRUE)
-            0,                                     // Flags de creación (por defecto 0)
+            0,                                     // Flags de creaciï¿½n (por defecto 0)
             NULL,                                  // Bloqueo del entorno del proceso (por defecto NULL)
             NULL,                                  // Directorio de inicio del proceso (por defecto NULL)
-            &si,                                   // Información de inicio del proceso
-            &pi)) {                                // Información sobre el proceso creado
+            &si,                                   // Informaciï¿½n de inicio del proceso
+            &pi)) {                                // Informaciï¿½n sobre el proceso creado
             fprintf(stderr, "Fallo al crear el proceso hijo.\n");
             return 1;
         }
@@ -426,6 +433,7 @@ int main(int argc, char* argv[]) {
         CloseHandle(sem2);
         CloseHandle(sem3);
         CloseHandle(sem4);
+        CloseHandle(sem5);
 
         //Liberar DLL
         FreeLibrary(dll);
@@ -436,7 +444,7 @@ int main(int argc, char* argv[]) {
             FILE_MAP_READ | FILE_MAP_WRITE,     // Permisos de acceso (lectura/escritura)
             0,                                  // Desplazamiento alto
             0,                                  // Desplazamiento bajo
-            sizeof(MemoriaCompartida)           // Tamaño de vista a mapear
+            sizeof(MemoriaCompartida)           // Tamaï¿½o de vista a mapear
         );
 
         HANDLE mutexHijo = OpenMutex(MUTEX_ALL_ACCESS, TRUE, "MutexPadre");
@@ -463,6 +471,11 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        sem5 = OpenSemaphore(SEMAPHORE_ALL_ACCESS, TRUE, "sem5");
+        if (sem5 == NULL) {
+            return 1;
+        }
+
         for (int i = 0; i < 32; i++) {
             estructura[i].i = i;
             estructura[i].idPadre = atoi(argv[2]);
@@ -473,10 +486,9 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        while (memoria_compartida->comprobar) {
-            
-        }
-        fncambios2();
+        WaitForSingleObject(sem5, INFINITE);
+
+        //fncambios2();
 
         // Desmapear la memoria compartida
         UnmapViewOfFile(memoria_compartida);
@@ -487,6 +499,7 @@ int main(int argc, char* argv[]) {
         CloseHandle(sem2);
         CloseHandle(sem3);
         CloseHandle(sem4);
+        CloseHandle(sem5);
 
         //Liberar DLL
         FreeLibrary(dll);
